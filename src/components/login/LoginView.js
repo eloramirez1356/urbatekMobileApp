@@ -5,10 +5,25 @@ import LoginViewStyles from './LoginViewStyles';
 
 const LoginView = ({navigation}) => {
     const { register, setValue, handleSubmit, errors } = useForm();
-    const onSubmit = data => {Alert.alert("Form Data", JSON.stringify(data));navigation.navigate('HomePage');};
+    const onSubmit = data => {
+        fetch('http://0.0.0.0:82/es/authenticate', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        }).then(r => console.log(r)).then(console.log("No respuesta: " + JSON.stringify(data))).catch(error => {console.error(error)});
+        /*fetch('https://jsonplaceholder.typicode.com/posts/1', {
+            method: 'GET'
+        })
+            .then((response) => response.json())
+            .then((responseJson) => {
+                console.log(responseJson);
+            })
+            .catch((error) => {
+                console.error(error);
+            });*/
+    };
 
     useEffect(() => {
-        register({ name: 'email'}, { required: true });
+        register({ name: 'username'}, { required: true });
         register({ name: 'password'}, {required: true});
     }, [register]);
 
@@ -17,7 +32,8 @@ const LoginView = ({navigation}) => {
         <View>
             <Text>Email</Text>
             <TextInput style={LoginViewStyles.input}
-                onChangeText={text => setValue("email", text, true)}
+                onChangeText={text => setValue("username", text, true)}
+                autoCapitalize = 'none'
             />
             {errors.email && <Text>"Email is required"</Text>}
 

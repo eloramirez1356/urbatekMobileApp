@@ -13,7 +13,31 @@ import ImagePicker from 'react-native-image-picker';
 
 const MachinesView = ({navigation}) => {
     const { register, setValue, handleSubmit, errors } = useForm();
-    const onSubmit = data => {Alert.alert("Form Data", JSON.stringify(data));navigation.navigate('HomePage');};
+    //const onSubmit = data => {Alert.alert("Form Data", JSON.stringify(data));navigation.navigate('HomePage');};
+    async function getJsonData() {
+        try {
+            let res = await fetch(
+                'http://127.0.0.1:82/es/api/add_ticket', {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'X-AUTH-TOKEN',
+                        'X-AUTH-TOKEN': 'token',
+                    },
+                    body: JSON.stringify({
+                        prueba1: 'value1',
+                        prueba2: 'value2',
+                    }),
+                }
+            );
+            let json = await res.json();
+            Alert.alert(json.data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    const onSubmit = data => {
+        getJsonData();
+    };
 
     const [date, setDate] = useState(new Date());
     const [mode, setMode] = useState('date');
@@ -21,6 +45,17 @@ const MachinesView = ({navigation}) => {
     const [avatarSource, setAvatarSource] = useState('Debe seleccionar una imagen');
     const [textButton, setTextButton] = useState('Select date');
     const [showImage, setShowImage] = useState(false);
+    const [dataImageBase64, setdataImageBase64] = useState( null);
+
+    useEffect(() => {
+        register({ name: 'date'}, { required: true });
+        register({ name: 'works'}, {required: true});
+        register({ name: 'machine'}, {required: true});
+        register({ name: 'saucepanTime'}, {required: true});
+        register({ name: 'hammerTime'}, {required: true});
+        register({ name: 'file'}, {required: true});
+        register({ name: 'employee'}, {required: true});
+    }, [register]);
 
     const handleChange = (e) => {
         setImage({
@@ -33,6 +68,7 @@ const MachinesView = ({navigation}) => {
         const currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
         setDate(currentDate);
+        setValue("date", date, true);
     };
 
     const showMode = currentMode => {
@@ -77,25 +113,18 @@ const MachinesView = ({navigation}) => {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const source = { uri: response.uri };
+                const imageData = { uri: response.data };
 
                 // You can also display the image using data:
                 // const source = { uri: 'data:image/jpeg;base64,' + response.data };
                 setAvatarSource(source);
+                setdataImageBase64(imageData);
+                //Poner ejemplo tonto para no escribir 8 megas en el string.
+                setValue("file", dataImageBase64, true);
                 setShowImage(true);
             }
         });
     };
-
-
-    useEffect(() => {
-        register({ name: 'date'}, { required: true });
-        register({ name: 'works'}, {required: true});
-        register({ name: 'machine'}, {required: true});
-        register({ name: 'saucepanTime'}, {required: true});
-        register({ name: 'hammerTime'}, {required: true});
-        register({ name: 'file'}, {required: true});
-        register({ name: 'employee'}, {required: true});
-    }, [register]);
 
 
     return (
@@ -155,6 +184,7 @@ const MachinesView = ({navigation}) => {
                 <Button onPress={pickImage} title={'Seleccionar Imagen'} />
             </View>
             {errors.file && <Text>"Debe subir una imagen"</Text>}
+            <Button title="Send" onPress={handleSubmit(onSubmit)}></Button>
         </View>
     );
 };
