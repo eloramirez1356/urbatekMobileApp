@@ -6,20 +6,30 @@ import LoginViewStyles from './LoginViewStyles';
 const LoginView = ({navigation}) => {
     const { register, setValue, handleSubmit, errors } = useForm();
     const onSubmit = data => {
-        fetch('http://0.0.0.0:82/es/authenticate', {
+        let formDataRequest = new FormData();
+        formDataRequest.append("username",data.username);
+        formDataRequest.append("password",data.password);
+        fetch('http://symfony.localhost:82/es/authenticate', {
             method: 'POST',
-            body: JSON.stringify(data)
-        }).then(r => console.log(r)).then(console.log("No respuesta: " + JSON.stringify(data))).catch(error => {console.error(error)});
-        /*fetch('https://jsonplaceholder.typicode.com/posts/1', {
-            method: 'GET'
-        })
-            .then((response) => response.json())
-            .then((responseJson) => {
-                console.log(responseJson);
-            })
-            .catch((error) => {
-                console.error(error);
-            });*/
+            headers:{"Content-Type":"multipart/form-data"},
+            body: formDataRequest
+
+        }).then(r => {
+            let result='';
+            console.log("status: " + r.status);
+            switch (r.status) {
+                case 401:
+                    Alert.alert("Invalid Credentials", "Username or password invalid");
+                    break;
+                case 200:
+                    result=r.json().then(goodResult=>console.log("getting good result: " + JSON.stringify(goodResult))).then(navigation.navigate("HomePage"));
+                    break;
+                default:
+                    Alert.alert("Error", "Unknown Error");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
     };
 
     useEffect(() => {
