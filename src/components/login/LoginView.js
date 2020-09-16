@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Text, View, TextInput, Button, Alert } from "react-native";
 import { useForm } from "react-hook-form";
 import LoginViewStyles from './LoginViewStyles';
+import * as Keychain from 'react-native-keychain';
 
 const LoginView = ({navigation}) => {
     const { register, setValue, handleSubmit, errors } = useForm();
@@ -15,14 +16,13 @@ const LoginView = ({navigation}) => {
             body: formDataRequest
 
         }).then(r => {
-            let result='';
             console.log("status: " + r.status);
             switch (r.status) {
                 case 401:
                     Alert.alert("Invalid Credentials", "Username or password invalid");
                     break;
                 case 200:
-                    result=r.json().then(goodResult=>console.log("getting good result: " + JSON.stringify(goodResult))).then(navigation.navigate("HomePage"));
+                    r.json().then(goodResult => Keychain.setGenericPassword('tokenUrbtck', goodResult.token).then(navigation.navigate("HomePage")));
                     break;
                 default:
                     Alert.alert("Error", "Unknown Error");
