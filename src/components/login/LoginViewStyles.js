@@ -15,8 +15,8 @@ const LoginViewStyles = StyleSheet.create({
     backgroundColor: 'red',
   },
   text: {
-    color: '#181e34'
-  }
+    color: '#181e34',
+  },
 });
 
 export default LoginViewStyles;
