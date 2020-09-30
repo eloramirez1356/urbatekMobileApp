@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, ScrollView} from 'react-native';
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
+import FormView from '../forms/FormView';
 
 const TrucksView = () => {
     const [materialOrPortes, setMaterialOrPortes] = useState(-1);
@@ -30,7 +31,7 @@ const TrucksView = () => {
                 );
                 break;
             case 1:
-                return (<Text>Formulario iria aqui</Text>);
+                return (<FormView type={materialOrPortes}></FormView>);
                 break;
             default:
                 return null;
@@ -40,10 +41,10 @@ const TrucksView = () => {
     const renderAfterSupplyOrRetrieval = function(){
         switch (supplyOrRetrieval) {
             case 2:
-                return (<Text>Formulario iria aqui</Text>);
+                return (<FormView type={supplyOrRetrieval}></FormView>);
                 break;
             case 3:
-                return (<Text>Formulario iria aqui</Text>);
+                return (<FormView type={supplyOrRetrieval}></FormView>);
                 break;
             default:
                 return null;
@@ -53,14 +54,16 @@ const TrucksView = () => {
 
     return (
     <View>
-        <Text>Seleccione el tipo de tarea realizada:</Text>
-        <RadioForm
-            radio_props={radio_props_materialOrPortes}
-            initial={-1}
-            onPress={(value) => {setMaterialOrPortes(value);setSupplyOrRetrieval(-1);}}
-        />
-        {renderSupplyOrRetrieval()}
-        {renderAfterSupplyOrRetrieval()}
+        <ScrollView>
+            <Text>Seleccione el tipo de tarea realizada:</Text>
+            <RadioForm
+                radio_props={radio_props_materialOrPortes}
+                initial={-1}
+                onPress={(value) => {setMaterialOrPortes(value);setSupplyOrRetrieval(-1);}}
+            />
+            {renderSupplyOrRetrieval()}
+            {renderAfterSupplyOrRetrieval()}
+        </ScrollView>
     </View>
   );
 };
