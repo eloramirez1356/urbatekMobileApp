@@ -43,13 +43,6 @@ const FormView = (type) => {
         }
     }, [register]);
 
-    const handleChange = e => {
-        setImage({
-            preview: URL.createObjectURL(e.target.files[0]),
-            raw: e.target.files[0],
-        });
-    };
-
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
