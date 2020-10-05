@@ -26,7 +26,6 @@ const FormView = (type) => {
         register({name: 'gasLiters'}, {required: true});
         register({name: 'comments'}, {required: false});
         register({name: 'file'}, {required: true});
-        register({name: 'employee'}, {required: true});
         //Machines form => 0
         if(formType.type == 0){
             register({name: 'hammerTime'}, {required: true});
@@ -216,14 +215,6 @@ const FormView = (type) => {
                     onChangeText={text => setValue('comments', text, false)}
                 />
                 {errors.comments && <Text>"Ha ocurrido un error"</Text>}
-
-
-                <Text>Empleado</Text>
-                <TextInput
-                    style={LoginViewStyles.input}
-                    onChangeText={text => setValue('employee', text, true)}
-                />
-                {errors.employee && <Text>"Debe seleccionar el empleado"</Text>}
 
                 <Text>Imagen</Text>
                 <View>
