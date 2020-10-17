@@ -4,25 +4,31 @@ import {useForm} from 'react-hook-form';
 import LoginViewStyles from '../login/LoginViewStyles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ImagePicker from 'react-native-image-picker';
+import {Picker} from '@react-native-community/picker';
 import FormView from '../forms/FormView';
 import {getTickets} from '../../api/ApiRequests';
-
-/*
- * Add the library for selecting files from phone (ADDED) => Set correctly the buttons and set when it should appear or not. Add dropdown with values obtained from database in employee (Should we put
- * employee as it is the one that is going to use the app?). Remove button for selecting date and make it something for taping
- * or different gesture in the app.
- * */
+import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const MachinesView = ({navigation}) => {
-  const {register, setValue, handleSubmit, errors} = useForm();
-  //const onSubmit = data => {Alert.alert("Form Data", JSON.stringify(data));navigation.navigate('HomePage');};
-  const tickets = getTickets();;
-  const onSubmit = data => {
-    getJsonData();
-  };
+  const [sitesBackend, setSitesBackend] = useState([]);
+
+  const getSites = async () => {
+    const jsonTickets =  await getTickets();
+
+    const getSiteFromTicketTest = (item, index) => {
+      console.log("Site: " + JSON.stringify(item.site));
+      console.log("Site index: " + index);
+      const sitesOfWork = sitesBackend;
+      sitesOfWork.push(item.site);
+      setSitesBackend(sitesOfWork);
+    };
+    jsonTickets.forEach(await getSiteFromTicketTest);
+  }
+
+  useEffect(() => {getSites()}, []);
 
   return (
-    <FormView type="0"></FormView>
+    <FormView type="0" sitesArray={sitesBackend}></FormView>
   );
 };
 

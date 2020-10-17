@@ -4,10 +4,12 @@ import {useForm} from 'react-hook-form';
 import LoginViewStyles from '../login/LoginViewStyles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ImagePicker from 'react-native-image-picker';
+import {Picker} from '@react-native-community/picker';
 
-const FormView = (type) => {
-    const [formType, setFormType] = useState(type);
-    {console.log(formType.type)}
+const FormView = (props) => {
+    const [formType, setFormType] = useState(props.type);
+    {console.log("lo que le paso" + JSON.stringify(props.sitesArray))}
+    {console.log("FormType: " + formType.type)}
     const {register, setValue, handleSubmit, errors} = useForm();
 
     const [date, setDate] = useState(new Date());
@@ -17,6 +19,7 @@ const FormView = (type) => {
     const [textButton, setTextButton] = useState('Select date');
     const [showImage, setShowImage] = useState(false);
     const [dataImageBase64, setdataImageBase64] = useState(null);
+    const [selectedWork, setSelectedWork] = useState(null);
 
     useEffect(() => {
         register({name: 'date'}, {required: true});
@@ -104,6 +107,8 @@ const FormView = (type) => {
         });
     };
 
+    const listPlaces = props.sitesArray.map(site => <Picker.Item label={site.name} value={site.id}/>);
+
     return (
         <View>
             <ScrollView>
@@ -131,6 +136,11 @@ const FormView = (type) => {
                 )}
 
                 <Text>Obra</Text>
+                <Picker
+                    style={{height:50, width: 300}}
+                    onValueChange = {(itemValue, itemIndex) => setSelectedWork(itemValue)}>
+                    {listPlaces}
+                </Picker>
                 <TextInput
                     style={LoginViewStyles.input}
                     onChangeText={text => setValue('works', text, true)}
