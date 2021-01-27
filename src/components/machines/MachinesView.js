@@ -8,27 +8,16 @@ import {Picker} from '@react-native-community/picker';
 import FormView from '../forms/FormView';
 import {getTickets} from '../../api/ApiRequests';
 import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import {getInfo} from '../../utils/Utils';
 
 const MachinesView = ({navigation}) => {
   const [sitesBackend, setSitesBackend] = useState([]);
+  const [info, setInfo] = useState(new Map());
 
-  const getSites = async () => {
-    const jsonTickets =  await getTickets();
-
-    const getSiteFromTicketTest = (item, index) => {
-      console.log("Site: " + JSON.stringify(item.site));
-      console.log("Site index: " + index);
-      const sitesOfWork = sitesBackend;
-      sitesOfWork.push(item.site);
-      setSitesBackend(sitesOfWork);
-    };
-    jsonTickets.forEach(await getSiteFromTicketTest);
-  }
-
-  useEffect(() => {getSites()}, []);
+  useEffect(() => {getInfo().then(result => setInfo(result))}, []);
 
   return (
-    <FormView type="0" sitesArray={sitesBackend}></FormView>
+    <FormView type="0" sitesArray={info} navigation={navigation}></FormView>
   );
 };
 

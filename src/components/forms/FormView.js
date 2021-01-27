@@ -5,11 +5,12 @@ import LoginViewStyles from '../login/LoginViewStyles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ImagePicker from 'react-native-image-picker';
 import {Picker} from '@react-native-community/picker';
+import {addTicket} from '../../api/ApiRequests';
+import * as Keychain from "react-native-keychain";
+import {formatDate, typeFromNumberToWord} from '../../utils/Utils';
 
-const FormView = (props) => {
-    const [formType, setFormType] = useState(props.type);
-    {console.log("lo que le paso" + JSON.stringify(props.sitesArray))}
-    {console.log("FormType: " + formType.type)}
+const FormView = ({type, sitesArray, navigation}) => {
+    const [formType, setFormType] = useState(type);
     const {register, setValue, handleSubmit, errors} = useForm();
 
     const [date, setDate] = useState(new Date());
@@ -19,27 +20,70 @@ const FormView = (props) => {
     const [textButton, setTextButton] = useState('Select date');
     const [showImage, setShowImage] = useState(false);
     const [dataImageBase64, setdataImageBase64] = useState(null);
-    const [selectedWork, setSelectedWork] = useState(null);
+
+    const manageResponseAddTicket = async (ticketData, navigation) => {
+        let responseAddTicket = await addTicket(ticketData);
+        console.log('status: ' + responseAddTicket.status);
+        if(responseAddTicket.status == 200){
+            Alert.alert('Ticket added', 'Ticket successfully added');
+            navigation.navigate('HomePage');
+        }else{
+            Alert.alert('Error', 'There was an error. Try it later');
+        }
+    };
+    {console.log("lo que le paso" + JSON.stringify(sitesArray))}
+    {console.log("FormType: " + formType)}
+
+    const onSubmit = async data => {
+        let formDataRequest = new FormData();
+        formDataRequest.append('date', formatDate(data.date));
+        formDataRequest.append('type', typeFromNumberToWord(formType));
+        formDataRequest.append('site', data.works.toString());
+        formDataRequest.append('machine', data.machine.toString());
+        formDataRequest.append('hours', data.totalHours);
+        formDataRequest.append('liters', data.gasLitters);
+        formDataRequest.append('comments', data.comments);
+        formDataRequest.append('file', data.file);
+
+        //Need to check the "provider" field in the backend
+        if(formType == 0){
+            formDataRequest.append('hammer_hours', data.hammerTime);
+        }else if(formType == 1){
+            formDataRequest.append('portages', data.portes);
+        }else if(formType == 2){
+            formDataRequest.append('originPoint', data.originPoint);
+            formDataRequest.append('tons', data.tons);
+            formDataRequest.append('material', data.material);
+            formDataRequest.append('num_travels', data.numberOfTrips);
+        }else if(formType == 3){
+            formDataRequest.append('destinationPoint', data.destinationPoint);
+            formDataRequest.append('material', data.material);
+            formDataRequest.append('num_travels', data.numberOfTrips);
+        }
+        manageResponseAddTicket(formDataRequest, navigation);
+    };
 
     useEffect(() => {
+
         register({name: 'date'}, {required: true});
         register({name: 'works'}, {required: true});
         register({name: 'machine'}, {required: true});
-        register({name: 'totalHours'}, {required: true});
-        register({name: 'gasLiters'}, {required: true});
+        register({name: 'totalHours'}, {required: false});
+        register({name: 'gasLitters'}, {required: true});
         register({name: 'comments'}, {required: false});
-        register({name: 'file'}, {required: true});
+        register({name: 'file'}, {required: false});
         //Machines form => 0
-        if(formType.type == 0){
+        if(formType == 0){
             register({name: 'hammerTime'}, {required: true});
-        }else if(formType.type == 1){
+        }else if(formType == 1){
             register({name: 'portes'}, {required: true});
-        }else if(formType.type == 2){
+        }else if(formType == 2){
             register({name: 'originPoint'}, {required: true});
             register({name: 'tons'}, {required: true});
-        }else if(formType.type == 3){
+            register({name: 'material'}, {required: true});
+            register({name: 'numberOfTrips'}, {required: true});
+        }else if(formType == 3){
             register({name: 'destinationPoint'}, {required: true});
-        }else if(formType.type == 3 || formType.type ==2){
             register({name: 'material'}, {required: true});
             register({name: 'numberOfTrips'}, {required: true});
         }
@@ -99,15 +143,41 @@ const FormView = (props) => {
                 // You can also display the image using data:
                 // const source = { uri: 'data:image/jpeg;base64,' + response.data };
                 setAvatarSource(source);
-                setdataImageBase64(imageData);
+                setdataImageBase64("data:image/png;base64," + imageData.uri);
                 //Poner ejemplo tonto para no escribir 8 megas en el string.
-                setValue('file', dataImageBase64, true);
+                setValue('file', "data:image/png;base64," + imageData.uri, true);
                 setShowImage(true);
             }
         });
     };
 
-    const listPlaces = props.sitesArray.map(site => <Picker.Item label={site.name} value={site.id}/>);
+    let listPlaces =  [<Picker.Item label={""} value={""}/>];
+    let listMachines = [<Picker.Item label={""} value={""}/>];
+    let listMaterials = [<Picker.Item label={""} value={""}/>];
+    let listPlacesFrom = [<Picker.Item label={""} value={""}/>];
+    let listPlacesTo = [<Picker.Item label={""} value={""}/>];
+    let listPortes = [<Picker.Item label={""} value={""}/>];
+    if(sitesArray.has("sites")){
+        listPlaces = [];
+        listMachines = [];
+        listMaterials = [];
+        listPlacesFrom = [];
+        listPlacesTo = [];
+        listPortes = [];
+        setValue("works", sitesArray.get("sites").keys().next().value, true);
+        sitesArray.get("sites").forEach((value, key) => listPlaces.push(<Picker.Item label={value} value={key}/>));
+        setValue("machine", sitesArray.get("machines").keys().next().value, true);
+        sitesArray.get("machines").forEach((value, key) => listMachines.push(<Picker.Item label={value} value={key}/>));
+        setValue("material", sitesArray.get("materials").keys().next().value, true);
+        sitesArray.get("materials").forEach((value, key) => listMaterials.push(<Picker.Item label={value} value={key}/>));
+        setValue("originPoint", sitesArray.get("placesFrom").keys().next().value, true);
+        sitesArray.get("placesFrom").forEach((value, key) => listPlacesFrom.push(<Picker.Item label={value} value={key}/>));
+        setValue("destinationPoint", sitesArray.get("placesTo").keys().next().value, true);
+        sitesArray.get("placesTo").forEach((value, key) => listPlacesTo.push(<Picker.Item label={value} value={key}/>));
+        setValue("portes", sitesArray.get("portages").keys().next().value, true);
+        sitesArray.get("portages").forEach(portage => listPortes.push(<Picker.Item label={portage} value={portage}/>));
+    }
+
 
     return (
         <View>
@@ -138,34 +208,39 @@ const FormView = (props) => {
                 <Text>Obra</Text>
                 <Picker
                     style={{height:50, width: 300}}
-                    onValueChange = {(itemValue, itemIndex) => setSelectedWork(itemValue)}>
+                    onValueChange = {(itemValue, itemIndex) => setValue('works', itemValue, true)}>
                     {listPlaces}
                 </Picker>
-                <TextInput
-                    style={LoginViewStyles.input}
-                    onChangeText={text => setValue('works', text, true)}
-                />
                 {errors.works && <Text>"Debe indicar la obra"</Text>}
 
-                <Text>Maquina</Text>
-                <TextInput
-                    style={LoginViewStyles.input}
-                    onChangeText={text => setValue('machine', text, true)}
-                />
+                <Text>Máquina</Text>
+                <Picker
+                    style={{height:50, width: 300}}
+                    onValueChange = {(itemValue, itemIndex) => setValue('machine', itemValue, true)}>
+                    {listMachines}
+                </Picker>
                 {errors.machine && <Text>"Debe indicar la maquina"</Text>}
 
-                {(formType.type == 1) &&
+                {(formType == 1) &&
                 <View>
                     <Text>Portes</Text>
-                    <TextInput style={LoginViewStyles.input} onChangeText={text => setValue('portes', text, true)}/>
+                    <Picker
+                        style={{height:50, width: 300}}
+                        onValueChange = {(itemValue, itemIndex) => setValue('portes', itemValue, true)}>
+                        {listPortes}
+                    </Picker>
                     {errors.material && <Text>"Debe indicar los portes"</Text>}
                 </View>
                 }
 
-                {(formType.type == 2 || formType.type ==3) &&
+                {(formType == 2 || formType ==3) &&
                     <View>
                         <Text>Material</Text>
-                        <TextInput style={LoginViewStyles.input} onChangeText={text => setValue('material', text, true)}/>
+                        <Picker
+                            style={{height:50, width: 300}}
+                            onValueChange = {(itemValue, itemIndex) => setValue('material', itemValue, true)}>
+                            {listMaterials}
+                        </Picker>
                         {errors.material && <Text>"Debe indicar el material"</Text>}
 
                         <Text>Numero de viajes</Text>
@@ -174,10 +249,14 @@ const FormView = (props) => {
                     </View>
                 }
 
-                {formType.type == 2 &&
+                {formType == 2 &&
                     <View>
                         <Text>Origen</Text>
-                        <TextInput style={LoginViewStyles.input} onChangeText={text => setValue('originPoint', text, true)}/>
+                        <Picker
+                            style={{height:50, width: 300}}
+                            onValueChange = {(itemValue, itemIndex) => setValue('originPoint', itemValue, true)}>
+                            {listPlacesFrom}
+                        </Picker>
                         {errors.originPoint && <Text>"Debe indicar el origen"</Text>}
 
                         <Text>Toneladas</Text>
@@ -186,10 +265,14 @@ const FormView = (props) => {
                     </View>
                 }
 
-                {formType.type == 3 &&
+                {formType == 3 &&
                     <View>
                         <Text>Destino</Text>
-                        <TextInput style={LoginViewStyles.input} onChangeText={text => setValue('destinationPoint', text, true)}/>
+                        <Picker
+                            style={{height:50, width: 300}}
+                            onValueChange = {(itemValue, itemIndex) => setValue('destinationPoint', itemValue, true)}>
+                            {listPlacesTo}
+                        </Picker>
                         {errors.destinationPoint && <Text>"Debe indicar las toneladas"</Text>}
                     </View>
                 }
@@ -200,7 +283,7 @@ const FormView = (props) => {
                     onChangeText={text => setValue('totalHours', text, true)}
                 />
                 {errors.totalHours && <Text>"Debe indicar las horas de cazo"</Text>}
-                {formType.type == 0 &&
+                {formType == 0 &&
                     <View>
                         <Text>Horas martillo</Text>
                         <TextInput
@@ -214,9 +297,9 @@ const FormView = (props) => {
                 <Text>Litros de gasóleo reportado</Text>
                 <TextInput
                     style={LoginViewStyles.input}
-                    onChangeText={text => setValue('gasLiters', text, true)}
+                    onChangeText={text => setValue('gasLitters', text, true)}
                 />
-                {errors.gasLiters && <Text>"Debe indicar los litros de gasóleo repostado"</Text>}
+                {errors.gasLitters && <Text>"Debe indicar los litros de gasóleo repostado"</Text>}
 
 
                 <Text>Comentarios</Text>
@@ -236,7 +319,7 @@ const FormView = (props) => {
                     <Button onPress={pickImage} title={'Seleccionar Imagen'} />
                 </View>
                 {errors.file && <Text>"Debe subir una imagen"</Text>}
-                <Button title="Send" onPress={console.log("handleSubmit(onSubmit)")} />
+                <Button title="Send" onPress={handleSubmit(onSubmit)} />
             </ScrollView>
         </View>
     );

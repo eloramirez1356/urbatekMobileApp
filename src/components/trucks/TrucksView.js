@@ -2,6 +2,7 @@ import React, {useEffect, useState, useRef} from 'react';
 import {View, Text, ScrollView} from 'react-native';
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
 import FormView from '../forms/FormView';
+import {getInfo} from '../../utils/Utils';
 
 const TrucksView = () => {
     const [materialOrPortes, setMaterialOrPortes] = useState(-1);
@@ -10,7 +11,9 @@ const TrucksView = () => {
     const [portesClicked, setPortesClicked] = useState(false);
     const [supplyClicked, setSupplyClicked] = useState(false);
     const [retrievalClicked, setRetrievalClicked] = useState(false);
+    const [info, setInfo] = useState(new Map());
 
+    useEffect(() => {getInfo().then(result => setInfo(result))}, []);
 
 
     const handleClickMaterialOrPortes = (value) => {
@@ -80,13 +83,13 @@ const TrucksView = () => {
             }
 
             {portesClicked &&
-                <FormView type={materialOrPortes}></FormView>
+                <FormView type={materialOrPortes} sitesArray={info}></FormView>
             }
             {supplyClicked &&
-                <FormView type={supplyOrRetrieval}></FormView>
+                <FormView type={supplyOrRetrieval} sitesArray={info}></FormView>
             }
             {retrievalClicked &&
-                <FormView type={supplyOrRetrieval}></FormView>
+                <FormView type={supplyOrRetrieval}sitesArray={info}></FormView>
             }
 
 
