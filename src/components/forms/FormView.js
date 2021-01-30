@@ -51,12 +51,12 @@ const FormView = ({type, sitesArray, navigation}) => {
         }else if(formType == 1){
             formDataRequest.append('portages', data.portes);
         }else if(formType == 2){
-            formDataRequest.append('originPoint', data.originPoint);
+            formDataRequest.append('provider', data.originPoint);
             formDataRequest.append('tons', data.tons);
             formDataRequest.append('material', data.material);
             formDataRequest.append('num_travels', data.numberOfTrips);
         }else if(formType == 3){
-            formDataRequest.append('destinationPoint', data.destinationPoint);
+            formDataRequest.append('provider', data.destinationPoint);
             formDataRequest.append('material', data.material);
             formDataRequest.append('num_travels', data.numberOfTrips);
         }
