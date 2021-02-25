@@ -4,7 +4,7 @@ import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-
 import FormView from '../forms/FormView';
 import {getInfo} from '../../utils/Utils';
 
-const TrucksView = () => {
+const TrucksView = ({navigation}) => {
     const [materialOrPortes, setMaterialOrPortes] = useState(-1);
     const [supplyOrRetrieval, setSupplyOrRetrieval] = useState(-1);
     const [materialClicked, setMaterialClicked] = useState(false);
@@ -12,8 +12,9 @@ const TrucksView = () => {
     const [supplyClicked, setSupplyClicked] = useState(false);
     const [retrievalClicked, setRetrievalClicked] = useState(false);
     const [info, setInfo] = useState(new Map());
+    const [infoLoaded, setInfoLoaded] = useState(false );
 
-    useEffect(() => {getInfo().then(result => setInfo(result))}, []);
+    useEffect(() => {getInfo().then(result => {setInfo(result)}).then(setInfoLoaded(true))}, [infoLoaded]);
 
 
     const handleClickMaterialOrPortes = (value) => {
@@ -45,12 +46,15 @@ const TrucksView = () => {
             {label: 'Portes', value: 1 }
         ];
         return(
-            <RadioForm
-                radio_props={radio_props_materialOrPortes}
-                initial={-1}
-                onPress={(e,value) => {handleClickMaterialOrPortes(e, value);setMaterialOrPortes(value);}}
+            <View>
+                <Text>Seleccione el tipo de tarea realizada:</Text>
+                <RadioForm
+                    radio_props={radio_props_materialOrPortes}
+                    initial={-1}
+                    onPress={(e,value) => {handleClickMaterialOrPortes(e, value); setMaterialOrPortes(value);}}
 
-            />
+                />
+            </View>
         );
     }
 
@@ -75,7 +79,6 @@ const TrucksView = () => {
     return (
     <View>
         <ScrollView>
-            <Text>Seleccione el tipo de tarea realizada:</Text>
             {materialOrPortesRadioButton()}
 
             {materialClicked &&
@@ -83,13 +86,13 @@ const TrucksView = () => {
             }
 
             {portesClicked &&
-                <FormView type={materialOrPortes} sitesArray={info}></FormView>
+                <FormView type={materialOrPortes} sitesArray={info} navigation={navigation}></FormView>
             }
             {supplyClicked &&
-                <FormView type={supplyOrRetrieval} sitesArray={info}></FormView>
+                <FormView type={supplyOrRetrieval} sitesArray={info} navigation={navigation}></FormView>
             }
             {retrievalClicked &&
-                <FormView type={supplyOrRetrieval}sitesArray={info}></FormView>
+                <FormView type={supplyOrRetrieval} sitesArray={info} navigation={navigation}></FormView>
             }
 
 

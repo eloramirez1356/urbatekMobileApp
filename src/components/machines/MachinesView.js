@@ -11,7 +11,6 @@ import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import {getInfo} from '../../utils/Utils';
 
 const MachinesView = ({navigation}) => {
-  const [sitesBackend, setSitesBackend] = useState([]);
   const [info, setInfo] = useState(new Map());
 
   useEffect(() => {getInfo().then(result => setInfo(result))}, []);

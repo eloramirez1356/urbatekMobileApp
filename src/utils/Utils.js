@@ -10,8 +10,7 @@ const getInfo = async () => {
     const machines = new Map();
     const machinesIds = new Set();
 
-    const material = new Map();
-    const materialIds = new Set();
+    const material = new Set();
 
     const placeFrom = new Map();
     const placeFromIds = new Set();
@@ -35,12 +34,9 @@ const getInfo = async () => {
             machines.set(item.machine.id,item.machine.name)
         }
 
-        if(item.material != null && !materialIds.has(item.material.id)){
-            materialIds.add(item.material.id);
-            material.set(item.material.id, item.material.name);
+        if(item.material != null){
+            material.add(item.material);
         }
-
-        //This placeFrom is wrong. I need values in JSON
 
         if(item.placeFrom != null && !placeFromIds.has(item.placeFrom.id)){
             placeFromIds.add(item.placeFrom.id);
@@ -56,18 +52,6 @@ const getInfo = async () => {
             portages.add(item.portages);
         }
 
-        //Tengo que meter todo lo que recibo de los tickets dentro del mapa, y ademas cotejar que si se repite no meta de nuevo el valor.
-        //Importante esta vaina.
-        //Pensar como hacer que esta funcion devuelva todo facilmente por arrays.
-        // Una vez devuelto por arrays, meter un picker por cada valor de cada formulario.
-        //Probar que funciona, y posteriormente crear el onsubmit para meter tickets desde el movil.
-
-        //Hacer lo mismo que he hecho con materiales pero con el resto de movidas de los formularios. Ver si se puede hacer mas eficiente
-        //el meter datos o cargar datos en funcion del tipo de formulario. No se si es mejor, o es mejor tener algo que devuelva todo.
-
-        //Hablar con aguado para ver como viene en tickets los valores de origen y destino, que no estan y no los puedo obtener.
-        //Tratar de enviar una peticion, aunque sea desde la primera pestania y adaptar todo para poder enviar el post y aniadir
-        //desde el movil
     };
     jsonTickets.forEach(await getSiteFromTicketTest);
     infoMap.set("sites",sites);

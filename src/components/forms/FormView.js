@@ -11,7 +11,7 @@ import {formatDate, typeFromNumberToWord} from '../../utils/Utils';
 
 const FormView = ({type, sitesArray, navigation}) => {
     const [formType, setFormType] = useState(type);
-    const {register, setValue, handleSubmit, errors} = useForm();
+    const {register, setValue, handleSubmit, errors, getValues} = useForm();
 
     const [date, setDate] = useState(new Date());
     const [mode, setMode] = useState('date');
@@ -165,17 +165,17 @@ const FormView = ({type, sitesArray, navigation}) => {
         listPlacesTo = [];
         listPortes = [];
         setValue("works", sitesArray.get("sites").keys().next().value, true);
-        sitesArray.get("sites").forEach((value, key) => listPlaces.push(<Picker.Item label={value} value={key}/>));
+        sitesArray.get("sites").forEach((value, key) => listPlaces.push(<Picker.Item label={value} value={key} key={value}/>));
         setValue("machine", sitesArray.get("machines").keys().next().value, true);
-        sitesArray.get("machines").forEach((value, key) => listMachines.push(<Picker.Item label={value} value={key}/>));
+        sitesArray.get("machines").forEach((value, key) => listMachines.push(<Picker.Item label={value} value={key} key={value}/>));
         setValue("material", sitesArray.get("materials").keys().next().value, true);
-        sitesArray.get("materials").forEach((value, key) => listMaterials.push(<Picker.Item label={value} value={key}/>));
+        sitesArray.get("materials").forEach((material) => listMaterials.push(<Picker.Item label={material} value={material} key={material}/>));
         setValue("originPoint", sitesArray.get("placesFrom").keys().next().value, true);
-        sitesArray.get("placesFrom").forEach((value, key) => listPlacesFrom.push(<Picker.Item label={value} value={key}/>));
+        sitesArray.get("placesFrom").forEach((value, key) => listPlacesFrom.push(<Picker.Item label={value} value={key} key={value}/>));
         setValue("destinationPoint", sitesArray.get("placesTo").keys().next().value, true);
-        sitesArray.get("placesTo").forEach((value, key) => listPlacesTo.push(<Picker.Item label={value} value={key}/>));
+        sitesArray.get("placesTo").forEach((value, key) => listPlacesTo.push(<Picker.Item label={value} value={key} key={value}/>));
         setValue("portes", sitesArray.get("portages").keys().next().value, true);
-        sitesArray.get("portages").forEach(portage => listPortes.push(<Picker.Item label={portage} value={portage}/>));
+        sitesArray.get("portages").forEach(portage => listPortes.push(<Picker.Item label={portage.toString()} value={portage} key={portage.toString()}/>));
     }
 
 
@@ -221,16 +221,16 @@ const FormView = ({type, sitesArray, navigation}) => {
                 </Picker>
                 {errors.machine && <Text>"Debe indicar la maquina"</Text>}
 
-                {(formType == 1) &&
-                <View>
-                    <Text>Portes</Text>
-                    <Picker
-                        style={{height:50, width: 300}}
-                        onValueChange = {(itemValue, itemIndex) => setValue('portes', itemValue, true)}>
-                        {listPortes}
-                    </Picker>
-                    {errors.material && <Text>"Debe indicar los portes"</Text>}
-                </View>
+                {formType == 1 &&
+                    <View>
+                        <Text>Portes</Text>
+                        <Picker
+                            style={{height:50, width: 300}}
+                            onValueChange = {(itemValue, itemIndex) => setValue('portes', itemValue, true)}>
+                            {listPortes}
+                        </Picker>
+                        {errors.material && <Text>"Debe indicar los portes"</Text>}
+                    </View>
                 }
 
                 {(formType == 2 || formType ==3) &&
